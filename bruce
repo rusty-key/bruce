@@ -1,0 +1,56 @@
+#!/bin/bash
+
+usage="$(basename "$0") [-h|-l] servicename {start|stop|reload} - service manager
+
+where:
+  -h  show this help text
+  -l  list services"
+
+die () {
+  echo >&2 "$@"
+  echo "$usage"
+  exit 1
+}
+
+[ "$#" -ge 1 ] || die "1 argument required, $# provided"
+
+while getopts ':hl' option; do
+  case "$option" in
+    l)
+      find ~/Library/LaunchAgents/ -name 'homebrew*' -exec basename {} \; | sed 's/homebrew.mxcl.//' | sed 's/.plist//'
+      exit
+      ;;
+    h | *)
+      echo "$usage"
+      exit
+      ;;
+  esac
+done
+
+SERVICE_SCRIPT=~/Library/LaunchAgents/homebrew.mxcl.$1.plist
+
+if [ ! -f $SERVICE_SCRIPT ]; then
+  echo "Service not found"
+  exit 1
+fi
+
+AVAILABLE_COMMANDS="load unload reload"
+command_exists=false
+for command in $AVAILABLE_COMMANDS
+do
+  [[ $2 == $command ]] && command_exists=true
+done
+
+if [ $command_exists == false ] ; then
+  echo "Command '$2' doesn't exist. Available commands: $AVAILABLE_COMMANDS"
+  exit 1
+fi
+
+if [ $2 == "reload" ] ; then
+  service $1 unload
+  service $1 load
+else
+  echo $2ing $1...
+  launchctl $2 -Fw $SERVICE_SCRIPT
+  echo $1 $2ed.
+fi
