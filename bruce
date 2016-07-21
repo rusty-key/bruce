@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="$(basename "$0") [-h|-l] servicename {start|stop|reload} - service manager
+usage="$(basename "$0") [-h|-l] servicename {unload|load|reload} - service manager
 
 where:
   -h  show this help text
