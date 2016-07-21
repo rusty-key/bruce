@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="$(basename "$0") [-h|-l] servicename {unload|load|reload} - service manager
+usage="$(basename "$0") [-h|-l] {load|unload|reload} servicename - service manager
 
 where:
   -h  show this help text
@@ -27,7 +27,7 @@ while getopts ':hl' option; do
   esac
 done
 
-SERVICE_SCRIPT=~/Library/LaunchAgents/homebrew.mxcl.$1.plist
+SERVICE_SCRIPT=~/Library/LaunchAgents/homebrew.mxcl.$2.plist
 
 if [ ! -f $SERVICE_SCRIPT ]; then
   echo "Service not found"
@@ -38,19 +38,19 @@ AVAILABLE_COMMANDS="load unload reload"
 command_exists=false
 for command in $AVAILABLE_COMMANDS
 do
-  [[ $2 == $command ]] && command_exists=true
+  [[ $1 == $command ]] && command_exists=true
 done
 
 if [ $command_exists == false ] ; then
-  echo "Command '$2' doesn't exist. Available commands: $AVAILABLE_COMMANDS"
+  echo "Command '$1' doesn't exist. Available commands: $AVAILABLE_COMMANDS"
   exit 1
 fi
 
-if [ $2 == "reload" ] ; then
-  service $1 unload
-  service $1 load
+if [ $1 == "reload" ] ; then
+  bruce unload $2
+  bruce load $2
 else
-  echo $2ing $1...
-  launchctl $2 -Fw $SERVICE_SCRIPT
-  echo $1 $2ed.
+  echo $1ing $2...
+  launchctl $1 -Fw $SERVICE_SCRIPT
+  echo $2 $1ed.
 fi
